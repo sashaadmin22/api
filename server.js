@@ -64,7 +64,7 @@ app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
 
     console.log("Imagens:", files?.length);
 
-    await Imagem.insertMany(
+    await Imagens.insertMany(
       files.map(f => ({ nome: f.originalname }))
     );
 
