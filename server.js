@@ -22,13 +22,6 @@ const Localizacao = mongoose.model("Localizacao", {
   data: { type: Date, default: Date.now }
 });
 
-// 📍 LOCALIZAÇÃO (já tem)
-const Localizacao = mongoose.model("Localizacao", {
-  latitude: Number,
-  longitude: Number,
-  data: { type: Date, default: Date.now }
-});
-
 // 👥 CONTATOS
 const Contato = mongoose.model("Contato", {
   nome: String,
