@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
 
 cloudinary.config({
   cloud_name: "dcaii8a2m",
@@ -73,10 +74,19 @@ app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
 
     for (const file of files) {
 
-      const base64 = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+      const uploadResult = await new Promise((resolve, reject) => {
 
-      const uploadResult = await cloudinary.uploader.upload(base64, {
-        folder: "app-loja"
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "app-loja"
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+
+        streamifier.createReadStream(file.buffer).pipe(stream);
       });
 
       imagensSalvas.push({
@@ -88,10 +98,7 @@ app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
 
     await Imagens.insertMany(imagensSalvas);
 
-    res.send({
-      ok: true,
-      imagens: imagensSalvas
-    });
+    res.send({ ok: true, imagens: imagensSalvas });
 
   } catch (err) {
     console.error("ERRO CLOUDINARY:", err);
