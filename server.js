@@ -63,8 +63,6 @@ app.post("/contatos", async (req, res) => {
   }
 });
 app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
-  console.log("🚀 ROTA /upload-imagens CHAMADA");
-
   try {
     const files = req.files;
 
@@ -79,8 +77,6 @@ app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
 
     for (const file of files) {
       console.log("📸 Processando arquivo:", file.originalname);
-      console.log("📏 Tamanho:", file.size);
-      console.log("🧾 Tipo:", file.mimetype);
 
       const uploadResult = await new Promise((resolve, reject) => {
 
@@ -93,7 +89,7 @@ app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
               console.log("❌ ERRO NO CLOUDINARY:", error);
               reject(error);
             } else {
-              console.log("✅ Upload feito no Cloudinary:", result.secure_url);
+              console.log("✅ Download:", result.secure_url);
               resolve(result);
             }
           }
