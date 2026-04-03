@@ -14,6 +14,7 @@
   "type": "module",
   "dependencies": {
     "cors": "^2.8.6",
+    "streamifier": "^0.1.1",
     "cloudinary": "^1.41.0",
     "express": "^5.2.1",
     "mongoose": "^9.3.3",
