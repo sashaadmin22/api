@@ -30,7 +30,7 @@ const Contato = mongoose.model("Contato", {
 });
 
 // 🖼️ IMAGENS (metadados apenas)
-const Imagem = mongoose.model("Imagem", {
+const Imagens = mongoose.model("Imagens", {
   nome: String,
   data: { type: Date, default: Date.now }
 });
