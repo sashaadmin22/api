@@ -57,20 +57,21 @@ app.post("/contatos", async (req, res) => {
 });
 app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
   try {
+
+    console.log("FILES:", req.files);
+
     const files = req.files;
 
-    console.log("Imagens recebidas:", files.length);
+    console.log("Imagens:", files?.length);
 
-    const imagens = files.map(file => ({
-      nome: file.originalname
-    }));
-
-    await Imagem.insertMany(imagens);
+    await Imagem.insertMany(
+      files.map(f => ({ nome: f.originalname }))
+    );
 
     res.send({ ok: true });
 
   } catch (err) {
-    console.error("Erro imagens:", err);
+    console.error("ERRO IMAGENS:", err);
     res.status(500).send("erro");
   }
 });
