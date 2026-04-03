@@ -63,16 +63,24 @@ app.post("/contatos", async (req, res) => {
   }
 });
 app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
+  console.log("🚀 ROTA /upload-imagens CHAMADA");
+
   try {
     const files = req.files;
 
+    console.log("📦 Arquivos recebidos:", files ? files.length : 0);
+
     if (!files || files.length === 0) {
+      console.log("❌ Nenhuma imagem enviada");
       return res.status(400).send("Nenhuma imagem enviada");
     }
 
     const imagensSalvas = [];
 
     for (const file of files) {
+      console.log("📸 Processando arquivo:", file.originalname);
+      console.log("📏 Tamanho:", file.size);
+      console.log("🧾 Tipo:", file.mimetype);
 
       const uploadResult = await new Promise((resolve, reject) => {
 
@@ -81,8 +89,13 @@ app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
             folder: "app-loja"
           },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+            if (error) {
+              console.log("❌ ERRO NO CLOUDINARY:", error);
+              reject(error);
+            } else {
+              console.log("✅ Upload feito no Cloudinary:", result.secure_url);
+              resolve(result);
+            }
           }
         );
 
@@ -96,12 +109,17 @@ app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
       });
     }
 
+    console.log("💾 Salvando no banco...");
+
     await Imagens.insertMany(imagensSalvas);
+
+    console.log("✅ Salvo no banco com sucesso");
+    console.log("📊 Total salvo:", imagensSalvas.length);
 
     res.send({ ok: true, imagens: imagensSalvas });
 
   } catch (err) {
-    console.error("ERRO CLOUDINARY:", err);
+    console.error("🔥 ERRO GERAL:", err);
     res.status(500).send("erro");
   }
 });
