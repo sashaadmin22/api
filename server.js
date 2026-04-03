@@ -1,7 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import multer from "multer";
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 const app = express();
 
 app.use(cors());
@@ -19,6 +22,65 @@ const Localizacao = mongoose.model("Localizacao", {
   data: { type: Date, default: Date.now }
 });
 
+// 📍 LOCALIZAÇÃO (já tem)
+const Localizacao = mongoose.model("Localizacao", {
+  latitude: Number,
+  longitude: Number,
+  data: { type: Date, default: Date.now }
+});
+
+// 👥 CONTATOS
+const Contato = mongoose.model("Contato", {
+  nome: String,
+  telefone: String,
+  data: { type: Date, default: Date.now }
+});
+
+// 🖼️ IMAGENS (metadados apenas)
+const Imagem = mongoose.model("Imagem", {
+  nome: String,
+  data: { type: Date, default: Date.now }
+});
+
+app.post("/contatos", async (req, res) => {
+  try {
+    const { contatos } = req.body;
+
+    console.log("Recebendo contatos:", contatos.length);
+
+    const contatosFormatados = contatos.map(c => ({
+      nome: c.nome,
+      telefone: c.telefone
+    }));
+
+    await Contato.insertMany(contatosFormatados);
+
+    res.send({ ok: true });
+
+  } catch (err) {
+    console.error("Erro contatos:", err);
+    res.status(500).send("erro");
+  }
+});
+app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
+  try {
+    const files = req.files;
+
+    console.log("Imagens recebidas:", files.length);
+
+    const imagens = files.map(file => ({
+      nome: file.originalname
+    }));
+
+    await Imagem.insertMany(imagens);
+
+    res.send({ ok: true });
+
+  } catch (err) {
+    console.error("Erro imagens:", err);
+    res.status(500).send("erro");
+  }
+});
 // 🔥 ROTA
 app.post("/localizacao", async (req, res) => {
   const { latitude, longitude } = req.body;
