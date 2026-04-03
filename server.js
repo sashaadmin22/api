@@ -2,7 +2,13 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
 
+cloudinary.config({
+  cloud_name: "dcaii8a2m",
+  api_key: "763781518433662",
+  api_secret: "NjkLqtNRxl3XTWOVvIFsfEhb8fs"
+});
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const app = express();
@@ -57,21 +63,38 @@ app.post("/contatos", async (req, res) => {
 });
 app.post("/upload-imagens", upload.array("imagens"), async (req, res) => {
   try {
-
-    console.log("FILES:", req.files);
-
     const files = req.files;
 
-    console.log("Imagens:", files?.length);
+    if (!files || files.length === 0) {
+      return res.status(400).send("Nenhuma imagem enviada");
+    }
 
-    await Imagens.insertMany(
-      files.map(f => ({ nome: f.originalname }))
-    );
+    const imagensSalvas = [];
 
-    res.send({ ok: true });
+    for (const file of files) {
+
+      const base64 = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+
+      const uploadResult = await cloudinary.uploader.upload(base64, {
+        folder: "app-loja"
+      });
+
+      imagensSalvas.push({
+        nome: file.originalname,
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id
+      });
+    }
+
+    await Imagens.insertMany(imagensSalvas);
+
+    res.send({
+      ok: true,
+      imagens: imagensSalvas
+    });
 
   } catch (err) {
-    console.error("ERRO IMAGENS:", err);
+    console.error("ERRO CLOUDINARY:", err);
     res.status(500).send("erro");
   }
 });
